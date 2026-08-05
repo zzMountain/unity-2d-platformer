@@ -8,7 +8,6 @@ namespace Platformer
         [SerializeField] private Transform _leftPoint;
         [SerializeField] private Transform _rightPoint;
         [SerializeField] private float _speed = 2f;
-        [SerializeField] private float _arrivalDistance = 0.05f;
 
         private float _direction = 1f;
         private Rigidbody2D _rigidbody;
@@ -23,13 +22,16 @@ namespace Platformer
         private void FixedUpdate()
         {
             Transform target = _direction > 0f ? _rightPoint : _leftPoint;
-            float distance = target.position.x - _rigidbody.position.x;
+            float nextPositionX = Mathf.MoveTowards(
+                _rigidbody.position.x,
+                target.position.x,
+                _speed * Time.fixedDeltaTime);
+            Vector2 nextPosition = new Vector2(nextPositionX, _rigidbody.position.y);
 
-            if (Mathf.Abs(distance) <= _arrivalDistance)
-                Reverse();
-
-            Vector2 nextPosition = _rigidbody.position + Vector2.right * (_direction * _speed * Time.fixedDeltaTime);
             _rigidbody.MovePosition(nextPosition);
+
+            if (Mathf.Approximately(nextPositionX, target.position.x))
+                Reverse();
         }
 
         private void Reverse()

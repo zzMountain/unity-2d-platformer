@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Platformer
 {
+    [RequireComponent(typeof(CircleCollider2D))]
     public class Coin : MonoBehaviour
     {
         [SerializeField] private int _value = 1;
@@ -30,17 +31,17 @@ namespace Platformer
             transform.Rotate(0f, _rotationSpeed * Time.deltaTime, 0f, Space.Self);
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        public bool TryCollect(out int value)
         {
-            if (_isCollected)
-                return;
+            value = 0;
 
-            if (other.TryGetComponent(out CoinWallet wallet) == false)
-                return;
+            if (_isCollected)
+                return false;
 
             _isCollected = true;
-            wallet.Add(_value);
+            value = _value;
             Collected?.Invoke(this);
+            return true;
         }
     }
 }

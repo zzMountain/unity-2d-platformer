@@ -6,7 +6,7 @@ namespace Platformer
     public class PlayerMover : MonoBehaviour
     {
         [SerializeField] private float _speed = 7f;
-        [SerializeField] private float _jumpVelocity = 15f;
+        [SerializeField] private float _jumpVelocity = 18f;
 
         private Rigidbody2D _rigidbody;
 
