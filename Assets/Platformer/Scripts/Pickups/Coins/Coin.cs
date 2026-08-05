@@ -35,7 +35,7 @@ namespace Platformer
         {
             value = 0;
 
-            if (_isCollected)
+            if (_isCollected || _value <= 0)
                 return false;
 
             _isCollected = true;
