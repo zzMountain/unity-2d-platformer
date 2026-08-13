@@ -5,7 +5,7 @@ namespace Platformer
     [RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
     public class PlayerAnimator : MonoBehaviour
     {
-        public const string SpeedParameterName = "Speed";
+        private const string SpeedParameterName = "Speed";
 
         private static readonly int s_speedHash = Animator.StringToHash(SpeedParameterName);
 

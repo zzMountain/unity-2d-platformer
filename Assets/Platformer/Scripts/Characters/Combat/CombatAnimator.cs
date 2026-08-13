@@ -6,8 +6,8 @@ namespace Platformer
     [RequireComponent(typeof(Health), typeof(MeleeAttacker))]
     public class CombatAnimator : MonoBehaviour
     {
-        public const string AttackParameterName = "Attack";
-        public const string DeathParameterName = "Death";
+        private const string AttackParameterName = "Attack";
+        private const string DeathParameterName = "Death";
 
         private static readonly int s_attackHash = Animator.StringToHash(AttackParameterName);
         private static readonly int s_deathHash = Animator.StringToHash(DeathParameterName);
@@ -29,23 +29,23 @@ namespace Platformer
 
         private void OnEnable()
         {
-            _attacker.AttackPerformed += OnAttackPerformed;
-            _health.Died += OnDied;
+            _attacker.AttackPerformed += HandleAttackPerformed;
+            _health.Died += HandleDied;
         }
 
         private void OnDisable()
         {
-            _attacker.AttackPerformed -= OnAttackPerformed;
-            _health.Died -= OnDied;
+            _attacker.AttackPerformed -= HandleAttackPerformed;
+            _health.Died -= HandleDied;
         }
 
-        private void OnAttackPerformed()
+        private void HandleAttackPerformed()
         {
             _attackEffect.flipX = _renderer.flipX;
             _animator.SetTrigger(s_attackHash);
         }
 
-        private void OnDied()
+        private void HandleDied()
         {
             _animator.SetTrigger(s_deathHash);
         }

@@ -19,16 +19,16 @@ namespace Platformer
 
         private void OnEnable()
         {
-            _wallet.AmountChanged += UpdateAmount;
-            UpdateAmount(_wallet.Amount);
+            _wallet.AmountChanged += HandleAmountChanged;
+            HandleAmountChanged(_wallet.Amount);
         }
 
         private void OnDisable()
         {
-            _wallet.AmountChanged -= UpdateAmount;
+            _wallet.AmountChanged -= HandleAmountChanged;
         }
 
-        private void UpdateAmount(int amount)
+        private void HandleAmountChanged(int amount)
         {
             _text.text = CounterPrefix + amount;
         }

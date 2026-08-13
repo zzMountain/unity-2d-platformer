@@ -3,24 +3,23 @@ using UnityEngine;
 
 namespace Platformer
 {
-    public class FirstAidKitSpawner : MonoBehaviour
+    public class PickupSpawner : MonoBehaviour
     {
-        private readonly Dictionary<FirstAidKit, Transform> _activeFirstAidKits =
-            new Dictionary<FirstAidKit, Transform>();
+        private readonly Dictionary<Pickup, Transform> _activePickups = new Dictionary<Pickup, Transform>();
         private readonly HashSet<Transform> _occupiedPoints = new HashSet<Transform>();
         private readonly List<float> _respawnTimers = new List<float>();
 
-        [SerializeField] private FirstAidKit _firstAidKitPrefab;
+        [SerializeField] private Pickup _pickupPrefab;
         [SerializeField] private Transform[] _spawnPoints;
-        [SerializeField] private int _maxActiveFirstAidKits = 3;
-        [SerializeField] private float _respawnDelay = 8f;
+        [SerializeField] private int _maximumActivePickups = 3;
+        [SerializeField] private float _respawnDelay = 3f;
 
         private void Start()
         {
-            int initialFirstAidKitCount = Mathf.Min(_maxActiveFirstAidKits, _spawnPoints.Length);
+            int initialPickupCount = Mathf.Min(_maximumActivePickups, _spawnPoints.Length);
 
-            for (int i = 0; i < initialFirstAidKitCount; i++)
-                SpawnFirstAidKit();
+            for (int i = 0; i < initialPickupCount; i++)
+                SpawnPickup();
         }
 
         private void Update()
@@ -33,19 +32,19 @@ namespace Platformer
                     continue;
 
                 _respawnTimers.RemoveAt(i);
-                SpawnFirstAidKit();
+                SpawnPickup();
             }
         }
 
         private void OnDestroy()
         {
-            foreach (FirstAidKit firstAidKit in _activeFirstAidKits.Keys)
-                firstAidKit.Collected -= OnFirstAidKitCollected;
+            foreach (Pickup pickup in _activePickups.Keys)
+                pickup.Collected -= HandlePickupCollected;
         }
 
-        private void SpawnFirstAidKit()
+        private void SpawnPickup()
         {
-            if (_activeFirstAidKits.Count >= _maxActiveFirstAidKits)
+            if (_activePickups.Count >= _maximumActivePickups)
                 return;
 
             Transform spawnPoint = GetAvailableSpawnPoint();
@@ -53,13 +52,9 @@ namespace Platformer
             if (spawnPoint == null)
                 return;
 
-            FirstAidKit firstAidKit = Instantiate(
-                _firstAidKitPrefab,
-                spawnPoint.position,
-                Quaternion.identity,
-                transform);
-            firstAidKit.Collected += OnFirstAidKitCollected;
-            _activeFirstAidKits.Add(firstAidKit, spawnPoint);
+            Pickup pickup = Instantiate(_pickupPrefab, spawnPoint.position, Quaternion.identity, transform);
+            pickup.Collected += HandlePickupCollected;
+            _activePickups.Add(pickup, spawnPoint);
             _occupiedPoints.Add(spawnPoint);
         }
 
@@ -68,7 +63,7 @@ namespace Platformer
             if (_occupiedPoints.Count >= _spawnPoints.Length)
                 return null;
 
-            int startIndex = UnityEngine.Random.Range(0, _spawnPoints.Length);
+            int startIndex = Random.Range(0, _spawnPoints.Length);
 
             for (int offset = 0; offset < _spawnPoints.Length; offset++)
             {
@@ -82,15 +77,15 @@ namespace Platformer
             return null;
         }
 
-        private void OnFirstAidKitCollected(FirstAidKit firstAidKit)
+        private void HandlePickupCollected(Pickup pickup)
         {
-            if (_activeFirstAidKits.Remove(firstAidKit, out Transform spawnPoint) == false)
+            if (_activePickups.Remove(pickup, out Transform spawnPoint) == false)
                 return;
 
-            firstAidKit.Collected -= OnFirstAidKitCollected;
+            pickup.Collected -= HandlePickupCollected;
             _occupiedPoints.Remove(spawnPoint);
             _respawnTimers.Add(_respawnDelay);
-            Destroy(firstAidKit.gameObject);
+            Destroy(pickup.gameObject);
         }
     }
 }
