@@ -22,16 +22,25 @@ namespace Platformer
 
         public bool TakeDamage(int damage)
         {
+            return TakeDamage(damage, out _);
+        }
+
+        public bool TakeDamage(int damage, out int appliedDamage)
+        {
+            appliedDamage = 0;
+
             if (damage <= 0 || IsAlive == false)
                 return false;
 
+            int previousValue = Current;
             Current = Mathf.Max(Current - damage, 0);
+            appliedDamage = previousValue - Current;
             ValueChanged?.Invoke(Current, Maximum);
 
             if (IsAlive == false)
                 Died?.Invoke();
 
-            return true;
+            return appliedDamage > 0;
         }
 
         public bool Restore(int amount)

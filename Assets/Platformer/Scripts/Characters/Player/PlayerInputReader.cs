@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,8 @@ namespace Platformer
     {
         private bool _isJumpRequested;
         private bool _isAttackRequested;
+
+        public event Action DrainRequested;
 
         public float MovementDirection { get; private set; }
 
@@ -32,6 +35,9 @@ namespace Platformer
 
                 if (keyboard.fKey.wasPressedThisFrame)
                     _isAttackRequested = true;
+
+                if (keyboard.qKey.wasPressedThisFrame)
+                    DrainRequested?.Invoke();
             }
 
             MovementDirection = Mathf.Clamp(direction, -1f, 1f);

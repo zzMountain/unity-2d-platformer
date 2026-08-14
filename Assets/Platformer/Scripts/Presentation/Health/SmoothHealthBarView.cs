@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ namespace Platformer
         [SerializeField] private float _changeSpeed = 0.5f;
 
         private bool _isStarted;
+        private Coroutine _valueChangeCoroutine;
         private Slider _slider;
         private float _targetValue;
 
@@ -35,20 +37,10 @@ namespace Platformer
             InitializeView();
         }
 
-        private void Update()
-        {
-            if (Mathf.Approximately(_slider.value, _targetValue))
-                return;
-
-            _slider.value = Mathf.MoveTowards(
-                _slider.value,
-                _targetValue,
-                _changeSpeed * Time.deltaTime);
-        }
-
         private void OnDisable()
         {
             _health.ValueChanged -= HandleHealthValueChanged;
+            StopValueChange();
         }
 
         private void InitializeView()
@@ -60,6 +52,22 @@ namespace Platformer
         private void HandleHealthValueChanged(int current, int maximum)
         {
             _targetValue = GetNormalizedValue(current, maximum);
+            AnimateValueIfNeeded();
+        }
+
+        private IEnumerator ChangeValue()
+        {
+            while (enabled && Mathf.Approximately(_slider.value, _targetValue) == false)
+            {
+                _slider.value = Mathf.MoveTowards(
+                    _slider.value,
+                    _targetValue,
+                    _changeSpeed * Time.deltaTime);
+                yield return null;
+            }
+
+            _slider.value = _targetValue;
+            _valueChangeCoroutine = null;
         }
 
         private float GetNormalizedValue(int current, int maximum)
@@ -68,6 +76,28 @@ namespace Platformer
                 return 0f;
 
             return (float)current / maximum;
+        }
+
+        private void AnimateValueIfNeeded()
+        {
+            if (_changeSpeed <= 0f || Mathf.Approximately(_slider.value, _targetValue))
+            {
+                StopValueChange();
+                _slider.value = _targetValue;
+                return;
+            }
+
+            if (_valueChangeCoroutine == null)
+                _valueChangeCoroutine = StartCoroutine(ChangeValue());
+        }
+
+        private void StopValueChange()
+        {
+            if (_valueChangeCoroutine == null)
+                return;
+
+            StopCoroutine(_valueChangeCoroutine);
+            _valueChangeCoroutine = null;
         }
     }
 }
